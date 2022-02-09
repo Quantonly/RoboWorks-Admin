@@ -15,7 +15,6 @@ import 'package:robo_works_admin/providers/user_provider.dart';
 import 'package:robo_works_admin/services/database/project_service.dart';
 import 'package:robo_works_admin/services/database/robot_service.dart';
 import 'package:robo_works_admin/services/database/user_service.dart';
-import 'package:robo_works_admin/globals/data.dart' as data;
 
 enum Status { retrieving, retrieved }
 
@@ -40,13 +39,10 @@ class _DashboardPageState extends State<DashboardPage> {
   Future<void> _fetchData() async {
     List<UserData> users = await UserService(uid: '').getUsers();
     context.read<UserProvider>().setUsers(users);
-    data.users = users;
     List<Project> projects = await ProjectService().getProjects();
     context.read<ProjectProvider>().setProjects(projects);
-    data.projects = projects;
     List<Robot> robots = await RobotService().getRobots();
     context.read<RobotProvider>().setRobots(robots);
-    data.robots = robots;
     setState(() {
       status = Status.retrieved;
     });
@@ -75,7 +71,7 @@ class _DashboardPageState extends State<DashboardPage> {
                       type: PageTransitionType.rightToLeft,
                       child: const UsersPage(),
                     ),
-                  );
+                  ).then((value) => setState(() {}));
                 },
                 child: Container(
                   height: 90,
@@ -126,7 +122,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                     ),
                                   ),
                                   Text(
-                                    data.users.length.toString(),
+                                    (context.read<UserProvider>().users as List<UserData>).length.toString(),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       color: Color.fromRGBO(223, 223, 223, 0.7),
@@ -158,7 +154,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             type: PageTransitionType.rightToLeft,
                             child: const ProjectsPage(),
                           ),
-                        );
+                        ).then((value) => setState(() {}));
                       },
                       child: Container(
                         height: 150,
@@ -211,7 +207,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ),
                             Text(
-                              data.projects.length.toString(),
+                              (context.read<ProjectProvider>().projects as List<Project>).length.toString(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: Color.fromRGBO(223, 223, 223, 0.7),
@@ -231,7 +227,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             type: PageTransitionType.rightToLeft,
                             child: const RobotsPage(),
                           ),
-                        );
+                        ).then((value) => setState(() {}));
                       },
                       child: Container(
                         height: 150,
@@ -284,7 +280,7 @@ class _DashboardPageState extends State<DashboardPage> {
                               ),
                             ),
                             Text(
-                              data.robots.length.toString(),
+                              (context.read<RobotProvider>().robots as List<Robot>).length.toString(),
                               style: const TextStyle(
                                 fontSize: 16,
                                 color: Color.fromRGBO(223, 223, 223, 0.7),

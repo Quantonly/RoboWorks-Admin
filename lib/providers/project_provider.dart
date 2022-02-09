@@ -16,6 +16,13 @@ class ProjectProvider with ChangeNotifier {
     sortProjects(currentSort);
   }
 
+  void addProject(Project project) {
+    print(_projects.length);
+    _projects.add(project);
+    print(_projects.length);
+    filterProjects(currentFilter);
+  }
+
   void filterProjects(filter) {
     if (filter == "") {
       _filteredProjects = _projects;
