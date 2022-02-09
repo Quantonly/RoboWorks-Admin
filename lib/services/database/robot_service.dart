@@ -1,8 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import 'package:robo_works_admin/models/robot.dart';
+import 'package:robo_works_admin/providers/robot_provider.dart';
 
 class RobotService {
   RobotService();
@@ -21,5 +24,22 @@ class RobotService {
       return robotList;
     });
     return response;
+  }
+
+  Future<void> createRobot(BuildContext context, String name, String project) async {
+    await robots.add({
+      'name': name,
+      'phases': {
+        'phase_1': {},
+        'phase_2': {},
+        'phase_3': {},
+        'phase_4': {},
+        'phase_5': {},
+      },
+      'project': project
+    }).then((value) {
+      Robot robot = Robot(value.id, name, project);
+      context.read<RobotProvider>().addRobot(robot);
+    });
   }
 }
