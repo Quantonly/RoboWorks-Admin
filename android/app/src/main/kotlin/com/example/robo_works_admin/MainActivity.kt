@@ -1,4 +1,4 @@
-package com.example.robo_works_admin
+package com.quantonly.robo_works_admin
 
 import io.flutter.embedding.android.FlutterActivity
 

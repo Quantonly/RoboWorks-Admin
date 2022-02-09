@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.robo_works_admin">
+    package="com.quantonly.robo_works_admin">
    <application
         android:label="robo_works_admin"
         android:name="${applicationName}"
