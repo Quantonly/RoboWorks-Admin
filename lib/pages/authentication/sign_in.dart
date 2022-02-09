@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:page_transition/page_transition.dart';
 
@@ -9,7 +10,8 @@ import 'package:robo_works_admin/services/authentication.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({Key? key}) : super(key: key);
+  final String? error;
+  const SignInPage({Key? key, this.error}) : super(key: key);
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -63,6 +65,14 @@ class _SignInPageState extends State<SignInPage> {
       emailController.text = result;
       passwordController.clear();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance?.addPostFrameCallback((_) {
+      if (widget.error != null) showToast(widget.error);
+    });
   }
 
   @override
