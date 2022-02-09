@@ -27,9 +27,13 @@ class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
         future: _reviewRole(firebaseUser),
         builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
           if (snapshot.hasData) {
-            if (snapshot.data == 'isAdmin') return const DashboardPage();
+            if (snapshot.data == 'isAdmin') {
+              return const DashboardPage();
+            } else {
+              return const SignInPage(error: 'Not authorized');
+            }
           }
-          return const SignInPage(error: 'Not authorized');
+          return Container();
         },
       );
     }
