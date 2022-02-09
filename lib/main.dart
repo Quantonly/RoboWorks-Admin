@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:robo_works_admin/pages/authentication/authentication_wrapper.dart';
+import 'package:robo_works_admin/providers/project_provider.dart';
+import 'package:robo_works_admin/providers/robot_provider.dart';
+import 'package:robo_works_admin/providers/user_provider.dart';
 import 'package:robo_works_admin/services/authentication.dart';
 
 void main() async {
@@ -24,6 +27,9 @@ class RoboWorksAdmin extends StatelessWidget {
     ]);
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => RobotProvider()),
+        ChangeNotifierProvider(create: (_) => ProjectProvider()),
         Provider<AuthenticationService>(
           create: (_) => AuthenticationService(FirebaseAuth.instance),
         ),
@@ -40,32 +46,6 @@ class RoboWorksAdmin extends StatelessWidget {
         ),
         debugShowCheckedModeBanner: false,
         home: const AuthenticationWrapper(),
-      ),
-    );
-  }
-}
-
-class Dashboard extends StatefulWidget {
-  const Dashboard({Key? key, required this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  State<Dashboard> createState() => _DashboardState();
-}
-
-class _DashboardState extends State<Dashboard> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const <Widget>[],
-        ),
       ),
     );
   }

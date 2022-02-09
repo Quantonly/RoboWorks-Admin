@@ -16,4 +16,15 @@ class UserService {
     });
     return response;
   }
+
+  Future<List<UserData>> getUsers() async {
+    List<UserData> response = await users.get().then((snapshot) {
+      List<UserData> userList = [];
+      for (var user in snapshot.docs) {
+        userList.add(UserData.fromMap(user.data() as Map<String, dynamic>, user.id));
+      }
+      return userList;
+    });
+    return response;
+  }
 }
