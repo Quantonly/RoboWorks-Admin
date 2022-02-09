@@ -46,7 +46,7 @@ class _AddRobotPageState extends State<AddRobotPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Create Robot',
+          'Create robot',
         ),
         actions: <Widget>[
           IconButton(
@@ -145,7 +145,7 @@ class _AddRobotPageState extends State<AddRobotPage> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Create Robot',
+                      'Create robot',
                       style: TextStyle(
                         color: Colors.black,
                       ),

@@ -177,7 +177,7 @@ class _RobotsPageState extends State<RobotsPage> {
                           type: PageTransitionType.rightToLeft,
                           child: const AddRobotPage(),
                         ),
-                      ).then((value) => setState(() {}));
+                      );
                     } else {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -192,7 +192,7 @@ class _RobotsPageState extends State<RobotsPage> {
                     }
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text("New Robot"),
+                  label: const Text("New robot"),
                 ),
               ),
             ],

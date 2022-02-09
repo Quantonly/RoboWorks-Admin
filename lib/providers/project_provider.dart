@@ -21,6 +21,11 @@ class ProjectProvider with ChangeNotifier {
     filterProjects(currentFilter);
   }
 
+  void editProject(String id, String name) {
+    _projects.firstWhere((project) => project.id == id).name = name;
+    filterProjects(currentFilter);
+  }
+
   void filterProjects(filter) {
     if (filter == "") {
       _filteredProjects = _projects;

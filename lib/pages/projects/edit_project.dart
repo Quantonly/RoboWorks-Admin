@@ -1,24 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
+import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/services/database/project_service.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 
-class AddProjectPage extends StatefulWidget {
-  const AddProjectPage({Key? key}) : super(key: key);
+class EditProjectPage extends StatefulWidget {
+  final Project project;
+  const EditProjectPage({Key? key, required this.project}) : super(key: key);
 
   @override
-  State<AddProjectPage> createState() => _AddProjectPageState();
+  State<EditProjectPage> createState() => _EditProjectPageState();
 }
 
-class _AddProjectPageState extends State<AddProjectPage> {
+class _EditProjectPageState extends State<EditProjectPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
 
-  void createProject() async {
-    ProjectService().createProject(context, nameController.text);
+  void editProject() async {
+    ProjectService().editProject(context, nameController.text, widget.project.id);
     Navigator.pop(context);
+  }
+
+  @override
+  void initState() {
+    nameController.text = widget.project.name;
+    super.initState();
   }
 
   @override
@@ -27,7 +35,7 @@ class _AddProjectPageState extends State<AddProjectPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Create project',
+          'Edit project',
         ),
         actions: <Widget>[
           IconButton(
@@ -52,7 +60,7 @@ class _AddProjectPageState extends State<AddProjectPage> {
                 transform: Matrix4.translationValues(0.0, -30.0, 0.0),
                 child: const Center(
                   child: Text(
-                    'Create new project',
+                    'Edit project',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -88,7 +96,7 @@ class _AddProjectPageState extends State<AddProjectPage> {
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    createProject();
+                    editProject();
                   }
                 },
                 child: Container(
@@ -103,7 +111,7 @@ class _AddProjectPageState extends State<AddProjectPage> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Create project',
+                      'Edit project',
                       style: TextStyle(
                         color: Colors.black,
                       ),

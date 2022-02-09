@@ -31,4 +31,12 @@ class ProjectService {
       context.read<ProjectProvider>().addProject(project);
     });
   }
+
+  Future<void> editProject(BuildContext context, String name, String id) async {
+    await projects.doc(id).update({
+      'name': name
+    }).then((value) {
+      context.read<ProjectProvider>().editProject(id, name);
+    });
+  }
 }

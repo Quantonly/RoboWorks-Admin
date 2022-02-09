@@ -1,35 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-
 import 'package:provider/provider.dart';
-
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
-import 'package:robo_works_admin/dialogs/sort_dialog.dart';
-import 'package:robo_works_admin/models/project.dart';
-import 'package:robo_works_admin/pages/projects/add_project.dart';
-import 'package:robo_works_admin/pages/projects/project_details.dart';
-import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/glow_behavior.dart';
-
+import 'package:robo_works_admin/models/project.dart';
+import 'package:robo_works_admin/models/robot.dart';
+import 'package:robo_works_admin/pages/projects/edit_project.dart';
+import 'package:robo_works_admin/pages/robots/add_robot.dart';
+import 'package:robo_works_admin/providers/project_provider.dart';
+import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 
-class ProjectsPage extends StatefulWidget {
-  const ProjectsPage({Key? key}) : super(key: key);
+class ProjectDetailsPage extends StatefulWidget {
+  final Project project;
+  const ProjectDetailsPage({Key? key, required this.project}) : super(key: key);
 
   @override
-  State<ProjectsPage> createState() => _ProjectsPageState();
+  State<ProjectDetailsPage> createState() => _ProjectDetailsPageState();
 }
 
-class _ProjectsPageState extends State<ProjectsPage> {
+class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
+  List<Robot> robots = [];
   List<Project> projects = [];
-  String sort = "Name";
-  List<String> dropDown = <String>[
-    "Name",
-    "Total robots",
-  ];
 
   Widget getInfo() {
-    if (projects.isEmpty) {
+    if (robots.isEmpty) {
       return Expanded(
         child: SizedBox(
           child: ScrollConfiguration(
@@ -48,7 +43,7 @@ class _ProjectsPageState extends State<ProjectsPage> {
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32.0),
                         child: Text(
-                          'No projects found',
+                          'No robots found',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white, fontSize: 24),
                         ),
@@ -70,21 +65,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
             child: ListView.builder(
               physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics()),
-              itemCount: projects.length,
+              itemCount: robots.length,
               itemBuilder: (context, index) {
-                Project project = projects[index];
+                Robot robot = robots[index];
+                Project project = projects
+                    .firstWhere((project) => project.id == robot.project);
+                Color titleColor = const Color.fromRGBO(223, 223, 223, 1);
+                Color subtitleColor = const Color.fromRGBO(223, 223, 223, 0.7);
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: ProjectDetailsPage(
-                          project: project,
-                        ),
-                      ),
-                    );
-                  },
+                  onTap: () {},
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
@@ -100,18 +89,18 @@ class _ProjectsPageState extends State<ProjectsPage> {
                               ),
                             ),
                             title: Text(
-                              project.name,
+                              robot.name,
                               textAlign: TextAlign.left,
-                              style: const TextStyle(
-                                color: Color.fromRGBO(223, 223, 223, 1),
+                              style: TextStyle(
+                                color: titleColor,
                                 fontSize: 20.0,
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
                             subtitle: Text(
-                              "Total robots: " + project.robotCount.toString(),
-                              style: const TextStyle(
-                                color: Color.fromRGBO(223, 223, 223, 0.7),
+                              project.name,
+                              style: TextStyle(
+                                color: subtitleColor,
                               ),
                             ),
                           ),
@@ -130,12 +119,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
 
   @override
   Widget build(BuildContext context) {
-    projects = context.watch<ProjectProvider>().filteredProjects;
+    robots = (context.watch<RobotProvider>().filteredRobots as List<Robot>)
+        .where((robot) => robot.project == widget.project.id)
+        .toList();
+    projects = context.watch<ProjectProvider>().projects;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Projects',
+          'Project details',
         ),
         actions: <Widget>[
           IconButton(
@@ -156,23 +148,75 @@ class _ProjectsPageState extends State<ProjectsPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(
-            height: 30,
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Project name: ' +
+                          projects
+                              .firstWhere(
+                                  (project) => project.id == widget.project.id)
+                              .name,
+                      style: const TextStyle(
+                        color: Color.fromRGBO(223, 223, 223, 1),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.rightToLeft,
+                            child: EditProjectPage(project: widget.project),
+                          ),
+                        );
+                      },
+                      child: const Icon(
+                        Icons.edit,
+                        color: Color.fromRGBO(223, 223, 223, 1),
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    
+                  },
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 50,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Row(
-                  children: const <Widget>[
-                    Text(
-                      'Projects',
-                      style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Color.fromRGBO(223, 223, 223, 1)),
-                    ),
-                  ],
+              const Padding(
+                padding: EdgeInsets.only(left: 16),
+                child: Text(
+                  'Robots',
+                  style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(223, 223, 223, 1)),
                 ),
               ),
               Container(
@@ -189,12 +233,14 @@ class _ProjectsPageState extends State<ProjectsPage> {
                       context,
                       PageTransition(
                         type: PageTransitionType.rightToLeft,
-                        child: const AddProjectPage(),
+                        child: AddRobotPage(
+                          project: widget.project,
+                        ),
                       ),
                     );
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text("New project"),
+                  label: const Text("New robot"),
                 ),
               ),
             ],
@@ -206,32 +252,15 @@ class _ProjectsPageState extends State<ProjectsPage> {
                   padding:
                       const EdgeInsets.only(left: 16.0, top: 16.0, right: 24),
                   child: TextFormField(
-                    initialValue: context.read<ProjectProvider>().currentFilter,
-                    decoration: style.getTextFieldDecoration('Search projects'),
+                    initialValue: context.read<RobotProvider>().currentFilter,
+                    decoration: style.getTextFieldDecoration('Search robots'),
                     onChanged: (value) {
-                      context.read<ProjectProvider>().filterProjects(value);
+                      context.read<RobotProvider>().filterRobots(value);
                     },
                     style: const TextStyle(
                       color: Colors.white,
                     ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 16.0, top: 16.0),
-                child: IconButton(
-                  color: const Color.fromRGBO(223, 223, 223, 1),
-                  icon: const Icon(Icons.sort),
-                  tooltip: 'Sort',
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) => SortDialog(
-                        dropDown: dropDown,
-                        provider: 'projects',
-                      ),
-                    );
-                  },
                 ),
               ),
             ],
