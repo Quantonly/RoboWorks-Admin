@@ -12,6 +12,7 @@ import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/glow_behavior.dart';
 
 import 'package:robo_works_admin/globals/style.dart' as style;
+import 'package:robo_works_admin/providers/robot_provider.dart';
 
 class ProjectsPage extends StatefulWidget {
   const ProjectsPage({Key? key}) : super(key: key);
@@ -83,7 +84,19 @@ class _ProjectsPageState extends State<ProjectsPage> {
                           project: project,
                         ),
                       ),
-                    );
+                    ).then((data) {
+                      if (data != null) {
+                        List<String> newData = data;
+                        if (newData[0] == 'delete') {
+                          context
+                              .read<ProjectProvider>()
+                              .deleteProject(newData[1]);
+                          context
+                              .read<RobotProvider>()
+                              .deleteProjectRobots(newData[1]);
+                        }
+                      }
+                    });
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),

@@ -21,6 +21,21 @@ class RobotProvider with ChangeNotifier {
     filterRobots(currentFilter);
   }
 
+  void editRobot(String id, String name) {
+    _robots.firstWhere((robot) => robot.id == id).name = name;
+    filterRobots(currentFilter);
+  }
+
+  void deleteRobot(String id) {
+    _robots.remove(_robots.firstWhere((robot) => robot.id == id));
+    filterRobots(currentFilter);
+  }
+
+  void deleteProjectRobots(String projectId) {
+    _robots.removeWhere((robot) => robot.project == projectId);
+    filterRobots(currentFilter);
+  }
+
   void filterRobots(filter) {
     if (filter == "") {
       _filteredRobots = _robots;
@@ -37,10 +52,11 @@ class RobotProvider with ChangeNotifier {
 
   void sortRobots(sort) {
     switch (sort) {
-      case "Name": {
-        _filteredRobots.sort((a, b) => a.name.compareTo(b.name));
-      }
-      break;
+      case "Name":
+        {
+          _filteredRobots.sort((a, b) => a.name.compareTo(b.name));
+        }
+        break;
     }
     currentSort = sort;
     notifyListeners();

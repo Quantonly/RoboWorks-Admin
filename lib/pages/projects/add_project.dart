@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
+import 'package:robo_works_admin/models/project.dart';
+import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/services/database/project_service.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 
@@ -17,7 +20,8 @@ class _AddProjectPageState extends State<AddProjectPage> {
   final TextEditingController nameController = TextEditingController();
 
   void createProject() async {
-    ProjectService().createProject(context, nameController.text);
+    Project project = await ProjectService().createProject(nameController.text);
+    context.read<ProjectProvider>().addProject(project);
     Navigator.pop(context);
   }
 
@@ -105,7 +109,7 @@ class _AddProjectPageState extends State<AddProjectPage> {
                     child: Text(
                       'Create project',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                   ),

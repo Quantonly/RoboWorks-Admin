@@ -3,7 +3,9 @@ import 'package:form_field_validator/form_field_validator.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 import 'package:robo_works_admin/models/project.dart';
+import 'package:robo_works_admin/models/robot.dart';
 import 'package:robo_works_admin/providers/project_provider.dart';
+import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/services/database/robot_service.dart';
 import 'package:provider/provider.dart';
 
@@ -24,7 +26,12 @@ class _AddRobotPageState extends State<AddRobotPage> {
   final TextEditingController nameController = TextEditingController();
 
   void createRobot() async {
-    RobotService().createRobot(context, nameController.text, dropdownValue);
+    Project project =
+        (context.read<ProjectProvider>().projects as List<Project>)
+            .firstWhere((project) => project.id == dropdownValue);
+    Robot robot = await RobotService().createRobot(nameController.text, project);
+    context.read<RobotProvider>().addRobot(robot);
+    context.read<ProjectProvider>().changeRobotCount(robot.project, 'add');
     Navigator.pop(context);
   }
 
@@ -147,7 +154,7 @@ class _AddRobotPageState extends State<AddRobotPage> {
                     child: Text(
                       'Create robot',
                       style: TextStyle(
-                        color: Colors.black,
+                        color: Colors.white,
                       ),
                     ),
                   ),

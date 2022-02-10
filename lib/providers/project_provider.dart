@@ -26,6 +26,20 @@ class ProjectProvider with ChangeNotifier {
     filterProjects(currentFilter);
   }
 
+  void deleteProject(String id) {
+    _projects.removeWhere((project) => project.id == id);
+    filterProjects(currentFilter);
+  }
+
+  void changeRobotCount(String id, String mode) {
+    if (mode == 'add') {
+      _projects.firstWhere((project) => project.id == id).robotCount++;
+    } else {
+      _projects.firstWhere((project) => project.id == id).robotCount--;
+    }
+    notifyListeners();
+  }
+
   void filterProjects(filter) {
     if (filter == "") {
       _filteredProjects = _projects;

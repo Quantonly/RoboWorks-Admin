@@ -1,34 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:robo_works_admin/dialogs/delete_dialog.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
 import 'package:provider/provider.dart';
-import 'package:robo_works_admin/models/project.dart';
-import 'package:robo_works_admin/providers/project_provider.dart';
-import 'package:robo_works_admin/services/database/project_service.dart';
+import 'package:robo_works_admin/models/robot.dart';
+import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
+import 'package:robo_works_admin/services/database/robot_service.dart';
 
-class EditProjectPage extends StatefulWidget {
-  final Project project;
-  const EditProjectPage({Key? key, required this.project}) : super(key: key);
+class EditRobotPage extends StatefulWidget {
+  final Robot robot;
+  const EditRobotPage({Key? key, required this.robot}) : super(key: key);
 
   @override
-  State<EditProjectPage> createState() => _EditProjectPageState();
+  State<EditRobotPage> createState() => _EditRobotPageState();
 }
 
-class _EditProjectPageState extends State<EditProjectPage> {
+class _EditRobotPageState extends State<EditRobotPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
 
-  void editProject() async {
-    ProjectService().editProject(nameController.text, widget.project.id);
-    context.read<ProjectProvider>().editProject(widget.project.id, nameController.text);
+  void editRobot() async {
+    RobotService().editRobot(nameController.text, widget.robot.id);
+    context
+        .read<RobotProvider>()
+        .editRobot(widget.robot.id, nameController.text);
     Navigator.pop(context);
   }
 
   @override
   void initState() {
-    nameController.text = widget.project.name;
+    nameController.text = widget.robot.name;
     super.initState();
   }
 
@@ -38,7 +41,7 @@ class _EditProjectPageState extends State<EditProjectPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Edit project',
+          'Edit robot',
         ),
         actions: <Widget>[
           IconButton(
@@ -63,7 +66,7 @@ class _EditProjectPageState extends State<EditProjectPage> {
                 transform: Matrix4.translationValues(0.0, -30.0, 0.0),
                 child: const Center(
                   child: Text(
-                    'Edit project',
+                    'Edit robot',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -99,7 +102,7 @@ class _EditProjectPageState extends State<EditProjectPage> {
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    editProject();
+                    editRobot();
                   }
                 },
                 child: Container(
@@ -114,7 +117,36 @@ class _EditProjectPageState extends State<EditProjectPage> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Edit project',
+                      'Edit robot',
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => DeleteDialog(
+                      mode: 'robot',
+                      robot: widget.robot,
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 50,
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.red,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Delete robot',
                       style: TextStyle(
                         color: Colors.white,
                       ),

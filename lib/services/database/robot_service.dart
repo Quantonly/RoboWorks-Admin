@@ -3,9 +3,11 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:robo_works_admin/models/project.dart';
 
 import 'package:robo_works_admin/models/robot.dart';
 import 'package:robo_works_admin/providers/robot_provider.dart';
+import 'package:robo_works_admin/services/database/project_service.dart';
 
 class RobotService {
   RobotService();
@@ -26,8 +28,8 @@ class RobotService {
     return response;
   }
 
-  Future<void> createRobot(BuildContext context, String name, String project) async {
-    await robots.add({
+  Future<Robot> createRobot(String name, Project project) async {
+    Robot response = await robots.add({
       'name': name,
       'phases': {
         'phase_1': {},
@@ -36,10 +38,27 @@ class RobotService {
         'phase_4': {},
         'phase_5': {},
       },
-      'project': project
+      'project': project.id
     }).then((value) {
-      Robot robot = Robot(value.id, name, project);
-      context.read<RobotProvider>().addRobot(robot);
+      Robot robot = Robot(value.id, name, project.id);
+      return robot;
     });
+    await ProjectService().changeRobotCount(project, 'add');
+    return response;
+  }
+
+  Future<void> editRobot(String name, String id) async {
+    await robots.doc(id).update({'name': name});
+  }
+
+  Future<void> deleteRobot(String id) async {
+    await robots.doc(id).delete();
+    //context.read<RobotProvider>().deleteRobot(id);
+  }
+
+  Future<void> deleteProjectRobots(List<Robot> robots, String id) async {
+    for (var robot in robots) { 
+      deleteRobot(robot.id);
+    }
   }
 }

@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:robo_works_admin/dialogs/delete_dialog.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
 import 'package:robo_works_admin/glow_behavior.dart';
 import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/models/robot.dart';
 import 'package:robo_works_admin/pages/projects/edit_project.dart';
 import 'package:robo_works_admin/pages/robots/add_robot.dart';
+import 'package:robo_works_admin/pages/robots/edit_robot.dart';
 import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
@@ -20,6 +22,7 @@ class ProjectDetailsPage extends StatefulWidget {
 }
 
 class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
+  String projectName = '';
   List<Robot> robots = [];
   List<Project> projects = [];
 
@@ -73,7 +76,24 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                 Color titleColor = const Color.fromRGBO(223, 223, 223, 1);
                 Color subtitleColor = const Color.fromRGBO(223, 223, 223, 0.7);
                 return GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: EditRobotPage(
+                          robot: robot,
+                        ),
+                      ),
+                    ).then((data) {
+                      if (data != null) {
+                        List<String> newData = data;
+                        if (newData[0] == 'delete') {
+                          context.read<RobotProvider>().deleteRobot(newData[1]);
+                        }
+                      }
+                    });
+                  },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
@@ -84,7 +104,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                             trailing: const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 8.0),
                               child: Icon(
-                                Icons.keyboard_arrow_right,
+                                Icons.edit,
                                 color: Color.fromRGBO(223, 223, 223, 1),
                               ),
                             ),
@@ -118,11 +138,21 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (projects.any((project) => project.id == widget.project.id)) {
+      projectName = projects
+          .firstWhere((project) => project.id == widget.project.id)
+          .name;
+    }
     robots = (context.watch<RobotProvider>().filteredRobots as List<Robot>)
         .where((robot) => robot.project == widget.project.id)
         .toList();
-    projects = context.watch<ProjectProvider>().projects;
+    projects = context.read<ProjectProvider>().projects;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
@@ -159,11 +189,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Project name: ' +
-                          projects
-                              .firstWhere(
-                                  (project) => project.id == widget.project.id)
-                              .name,
+                      'Project name: ' + projectName,
                       style: const TextStyle(
                         color: Color.fromRGBO(223, 223, 223, 1),
                         fontSize: 22,
@@ -181,7 +207,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                             type: PageTransitionType.rightToLeft,
                             child: EditProjectPage(project: widget.project),
                           ),
-                        );
+                        ).then((value) => setState(() {}));
                       },
                       child: const Icon(
                         Icons.edit,
@@ -192,7 +218,13 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => DeleteDialog(
+                        mode: 'project',
+                        project: widget.project,
+                      ),
+                    );
                   },
                   child: const Icon(
                     Icons.delete,
@@ -237,7 +269,7 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                           project: widget.project,
                         ),
                       ),
-                    );
+                    ).then((value) => setState(() {}));
                   },
                   icon: const Icon(Icons.add),
                   label: const Text("New robot"),

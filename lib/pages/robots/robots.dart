@@ -6,6 +6,7 @@ import 'package:robo_works_admin/glow_behavior.dart';
 import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/models/robot.dart';
 import 'package:robo_works_admin/pages/robots/add_robot.dart';
+import 'package:robo_works_admin/pages/robots/edit_robot.dart';
 import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
@@ -71,7 +72,24 @@ class _RobotsPageState extends State<RobotsPage> {
                 Color titleColor = const Color.fromRGBO(223, 223, 223, 1);
                 Color subtitleColor = const Color.fromRGBO(223, 223, 223, 0.7);
                 return GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      PageTransition(
+                        type: PageTransitionType.rightToLeft,
+                        child: EditRobotPage(
+                          robot: robot,
+                        ),
+                      ),
+                    ).then((data) {
+                      if (data != null) {
+                        List<String> newData = data;
+                        if (newData[0] == 'delete') {
+                          context.read<RobotProvider>().deleteRobot(newData[1]);
+                        }
+                      }
+                    });
+                  },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
@@ -82,7 +100,7 @@ class _RobotsPageState extends State<RobotsPage> {
                             trailing: const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 8.0),
                               child: Icon(
-                                Icons.keyboard_arrow_right,
+                                Icons.edit,
                                 color: Color.fromRGBO(223, 223, 223, 1),
                               ),
                             ),
