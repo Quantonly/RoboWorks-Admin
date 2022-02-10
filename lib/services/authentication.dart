@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth;
@@ -16,6 +17,20 @@ class AuthenticationService {
       if (e.code == 'user-not-found') return {'error': 'Email not found'};
       if (e.code == 'wrong-password') return {'error': 'Incorrect password'};
       return {'error': 'Something went wrong'};
+    }
+  }
+
+  Future<Map<String, dynamic>> signUp({required String email, required String password}) async {
+    try {
+      FirebaseApp app = await Firebase.initializeApp(
+        name: 'Secondary', options: Firebase.app().options);
+      UserCredential userCredential = await FirebaseAuth.instanceFor(app: app).createUserWithEmailAndPassword(email: email, password: password);
+      String uid = userCredential.user!.uid;
+      await FirebaseAuth.instanceFor(app: app).signOut();
+      return {'success': uid};
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') return {'error': 'email_in_use'};
+      return {'error': 'something_went_wrong'};
     }
   }
 

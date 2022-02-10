@@ -1,59 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
-import 'package:robo_works_admin/globals/style.dart' as style;
 import 'package:robo_works_admin/models/project.dart';
-import 'package:robo_works_admin/models/robot.dart';
+import 'package:robo_works_admin/models/user_data.dart';
 import 'package:robo_works_admin/providers/project_provider.dart';
-import 'package:robo_works_admin/providers/robot_provider.dart';
-import 'package:robo_works_admin/services/database/robot_service.dart';
-import 'package:provider/provider.dart';
+import 'package:robo_works_admin/providers/user_provider.dart';
+import 'package:robo_works_admin/services/authentication.dart';
+import 'package:robo_works_admin/services/database/project_service.dart';
+import 'package:robo_works_admin/globals/style.dart' as style;
+import 'package:robo_works_admin/services/database/user_service.dart';
 
-class AddRobotPage extends StatefulWidget {
-  final Project? project;
-  const AddRobotPage({Key? key, this.project}) : super(key: key);
+class AddUserPage extends StatefulWidget {
+  const AddUserPage({Key? key}) : super(key: key);
 
   @override
-  State<AddRobotPage> createState() => _AddRobotPageState();
+  State<AddUserPage> createState() => _AddUserPageState();
 }
 
-class _AddRobotPageState extends State<AddRobotPage> {
+class _AddUserPageState extends State<AddUserPage> {
   final _formKey = GlobalKey<FormState>();
-  List<Project> projects = [];
-  String dropdownValue = '';
-  List<String> projectIds = [];
 
   final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
 
-  void createRobot() async {
-    Project project =
-        (context.read<ProjectProvider>().projects as List<Project>)
-            .firstWhere((project) => project.id == dropdownValue);
-    Robot robot = await RobotService().createRobot(nameController.text, project);
-    context.read<RobotProvider>().addRobot(robot);
-    context.read<ProjectProvider>().changeRobotCount(robot.project, 'add');
-    Navigator.pop(context);
-  }
-
-  void setLists() {
-    if (projectIds.isEmpty) {
-      projects = context.read<ProjectProvider>().projects;
-      for (var project in projects) {
-        projectIds.add(project.id);
-      }
-      dropdownValue = projectIds[0];
-      if (widget.project != null) dropdownValue = widget.project!.id;
-    }
+  void createUser() async {
+    context
+        .read<AuthenticationService>()
+        .signUp(
+          email: emailController.text.trim(),
+          password: passwordController.text.trim(),
+        )
+        .then((res) async {
+          UserData user = await UserService(uid: '').createUser(res['success'], nameController.text.trim(), emailController.text.trim());
+          context.read<UserProvider>().addUser(user);
+          Navigator.pop(context);
+        });
   }
 
   @override
   Widget build(BuildContext context) {
-    setLists();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Create robot',
+          'Create user',
         ),
         actions: <Widget>[
           IconButton(
@@ -78,7 +70,7 @@ class _AddRobotPageState extends State<AddRobotPage> {
                 transform: Matrix4.translationValues(0.0, -30.0, 0.0),
                 child: const Center(
                   child: Text(
-                    'Create new robot',
+                    'Create new user',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -109,35 +101,46 @@ class _AddRobotPageState extends State<AddRobotPage> {
                       ),
                     ),
                   ),
-                  DropdownButton<String>(
-                    value: dropdownValue,
-                    icon: const Icon(Icons.arrow_downward),
-                    elevation: 16,
-                    style: const TextStyle(color: Colors.deepPurple),
-                    underline: Container(
-                      height: 2,
-                      color: Colors.deepPurpleAccent,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    child: TextFormField(
+                      controller: emailController,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration: style.getTextFieldDecoration('Email'),
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Invalid email'),
+                      ]),
+                      keyboardType: TextInputType.emailAddress,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
                     ),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        dropdownValue = newValue!;
-                      });
-                    },
-                    items: projectIds.map((String id) {
-                      Project project =
-                          projects.firstWhere((project) => project.id == id);
-                      return DropdownMenuItem<String>(
-                        value: project.id,
-                        child: Text(project.name),
-                      );
-                    }).toList(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                    ),
+                    child: TextFormField(
+                      controller: passwordController,
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      decoration: style.getTextFieldDecoration('Password'),
+                      validator: MultiValidator([
+                        RequiredValidator(errorText: 'Invalid password'),
+                      ]),
+                      keyboardType: TextInputType.name,
+                      obscureText: true,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ]),
               ),
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    createRobot();
+                    createUser();
                   }
                 },
                 child: Container(
@@ -152,7 +155,7 @@ class _AddRobotPageState extends State<AddRobotPage> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Create robot',
+                      'Create user',
                       style: TextStyle(
                         color: Colors.white,
                       ),

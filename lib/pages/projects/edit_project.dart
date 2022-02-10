@@ -88,7 +88,7 @@ class _EditProjectPageState extends State<EditProjectPage> {
                       validator: MultiValidator([
                         RequiredValidator(errorText: 'Invalid name'),
                       ]),
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.name,
                       style: const TextStyle(
                         color: Colors.white,
                       ),

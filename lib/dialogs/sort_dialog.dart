@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:robo_works_admin/providers/project_provider.dart';
+import 'package:robo_works_admin/providers/user_provider.dart';
 
 class SortDialog extends StatefulWidget {
   final List<String> dropDown;
@@ -23,6 +24,8 @@ class _SortDialogState extends State<SortDialog> {
             Navigator.of(context).pop();
             if (widget.provider == 'projects') {
               context.read<ProjectProvider>().sortProjects(sort);
+            } else if (widget.provider == 'users') {
+              context.read<UserProvider>().sortUsers(sort);
             }
           },
           child: SizedBox(

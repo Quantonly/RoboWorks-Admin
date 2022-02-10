@@ -16,6 +16,11 @@ class UserProvider with ChangeNotifier {
     sortUsers(currentSort);
   }
 
+  void addUser(UserData user) {
+    _users.add(user);
+    filterUsers(currentFilter);
+  }
+
   void filterUsers(filter) {
     if (filter == "") {
       _filteredUsers = _users;

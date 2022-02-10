@@ -91,7 +91,7 @@ class _EditRobotPageState extends State<EditRobotPage> {
                       validator: MultiValidator([
                         RequiredValidator(errorText: 'Invalid name'),
                       ]),
-                      keyboardType: TextInputType.emailAddress,
+                      keyboardType: TextInputType.name,
                       style: const TextStyle(
                         color: Colors.white,
                       ),

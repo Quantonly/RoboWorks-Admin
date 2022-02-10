@@ -11,7 +11,8 @@ class UserService {
 
   Future<UserData> getUserData() async {
     UserData response = await users.doc(uid).get().then((snapshot) {
-      UserData userData = UserData.fromMap(snapshot.data() as Map<String, dynamic>, uid);
+      UserData userData =
+          UserData.fromMap(snapshot.data() as Map<String, dynamic>, uid);
       return userData;
     });
     return response;
@@ -21,9 +22,23 @@ class UserService {
     List<UserData> response = await users.get().then((snapshot) {
       List<UserData> userList = [];
       for (var user in snapshot.docs) {
-        userList.add(UserData.fromMap(user.data() as Map<String, dynamic>, user.id));
+        userList.add(
+            UserData.fromMap(user.data() as Map<String, dynamic>, user.id));
       }
       return userList;
+    });
+    return response;
+  }
+
+  Future<UserData> createUser(String id, String name, String email) async {
+    UserData response = await users.add({
+      'displayName': name,
+      'email': email,
+      'projects': [],
+      'role': 'user'
+    }).then((value) {
+      UserData user = UserData(value.id, name, email, 'user', []);
+      return user;
     });
     return response;
   }
