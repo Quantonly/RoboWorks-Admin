@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:provider/provider.dart';
+import 'package:robo_works_admin/dialogs/delete_dialog.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
 import 'package:robo_works_admin/dialogs/sort_dialog.dart';
 import 'package:robo_works_admin/glow_behavior.dart';
+import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/models/user_data.dart';
+import 'package:robo_works_admin/pages/users/edit_user.dart';
+import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
-import 'package:robo_works_admin/pages/users/add_user.dart';
-import 'package:robo_works_admin/pages/users/user_details.dart';
 import 'package:robo_works_admin/providers/user_provider.dart';
+import 'package:robo_works_admin/services/database/user_service.dart';
 
-class UsersPage extends StatefulWidget {
-  const UsersPage({Key? key}) : super(key: key);
+class UserDetailsPage extends StatefulWidget {
+  final UserData user;
+  const UserDetailsPage({Key? key, required this.user}) : super(key: key);
 
   @override
-  State<UsersPage> createState() => _UsersPageState();
+  State<UserDetailsPage> createState() => _UserDetailsPageState();
 }
 
-class _UsersPageState extends State<UsersPage> {
-  List<UserData> users = [];
+class _UserDetailsPageState extends State<UserDetailsPage> {
+  List<Project> projects = [];
   String sort = "Name";
   List<String> dropDown = <String>[
     "Name",
-    "Email",
+    "Total robots",
   ];
+  List<String> projectIds = [];
+  List<bool> checkbox = [];
 
   Widget getInfo() {
-    if (users.isEmpty) {
+    if (projects.isEmpty) {
       return Expanded(
         child: SizedBox(
           child: ScrollConfiguration(
@@ -45,7 +51,7 @@ class _UsersPageState extends State<UsersPage> {
                       child: Padding(
                         padding: EdgeInsets.symmetric(horizontal: 32.0),
                         child: Text(
-                          'No users found',
+                          'No projects found',
                           textAlign: TextAlign.center,
                           style: TextStyle(color: Colors.white, fontSize: 24),
                         ),
@@ -67,30 +73,14 @@ class _UsersPageState extends State<UsersPage> {
             child: ListView.builder(
               physics: const BouncingScrollPhysics(
                   parent: AlwaysScrollableScrollPhysics()),
-              itemCount: users.length,
+              itemCount: projects.length,
               itemBuilder: (context, index) {
-                UserData user = users[index];
+                Project project = projects[index];
+                int projectIdIndex = projectIds.indexOf(project.id);
                 Color titleColor = const Color.fromRGBO(223, 223, 223, 1);
                 Color subtitleColor = const Color.fromRGBO(223, 223, 223, 0.7);
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: UserDetailsPage(
-                          user: user,
-                        ),
-                      ),
-                    ).then((data) {
-                      if (data != null) {
-                        List<String> newData = data;
-                        if (newData[0] == 'delete') {
-                          context.read<UserProvider>().deleteUser(newData[1]);
-                        }
-                      }
-                    });
-                  },
+                  onTap: () {},
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Card(
@@ -98,15 +88,18 @@ class _UsersPageState extends State<UsersPage> {
                         children: [
                           ListTile(
                             tileColor: const Color.fromRGBO(66, 66, 66, 1),
-                            trailing: const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 8.0),
-                              child: Icon(
-                                Icons.keyboard_arrow_right,
-                                color: Color.fromRGBO(223, 223, 223, 1),
-                              ),
+                            trailing: Checkbox(
+                              checkColor: Colors.white,
+                              value: checkbox[projectIdIndex],
+                              onChanged: (bool? value) {
+                                setState(() {
+                                  checkbox[projectIdIndex] =
+                                      !checkbox[projectIdIndex];
+                                });
+                              },
                             ),
                             title: Text(
-                              user.displayName,
+                              project.name,
                               textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: titleColor,
@@ -115,7 +108,7 @@ class _UsersPageState extends State<UsersPage> {
                               ),
                             ),
                             subtitle: Text(
-                              user.email,
+                              'Total robots: ' + project.robotCount.toString(),
                               style: TextStyle(
                                 color: subtitleColor,
                               ),
@@ -135,13 +128,27 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   @override
+  void initState() {
+    getCheckList();
+    super.initState();
+  }
+
+  void getCheckList() {
+    List<Project> allProjects = context.read<ProjectProvider>().projects;
+    for (var project in allProjects) {
+      projectIds.add(project.id);
+      checkbox.add(widget.user.projects.contains(project.id));
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    users = context.watch<UserProvider>().filteredUsers;
+    projects = context.watch<ProjectProvider>().filteredProjects;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Users',
+          'User details',
         ),
         actions: <Widget>[
           IconButton(
@@ -162,7 +169,64 @@ class _UsersPageState extends State<UsersPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(
-            height: 30,
+            height: 20,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'User name: ' + widget.user.displayName,
+                      style: const TextStyle(
+                        color: Color.fromRGBO(223, 223, 223, 1),
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(
+                      width: 15,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          PageTransition(
+                            type: PageTransitionType.rightToLeft,
+                            child: EditUserPage(user: widget.user),
+                          ),
+                        ).then((value) => setState(() {}));
+                      },
+                      child: const Icon(
+                        Icons.edit,
+                        color: Color.fromRGBO(223, 223, 223, 1),
+                      ),
+                    ),
+                  ],
+                ),
+                GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => DeleteDialog(
+                        mode: 'user',
+                        user: widget.user,
+                      ),
+                    );
+                  },
+                  child: const Icon(
+                    Icons.delete,
+                    color: Colors.red,
+                  ),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 50,
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -171,7 +235,7 @@ class _UsersPageState extends State<UsersPage> {
               const Padding(
                 padding: EdgeInsets.only(left: 16),
                 child: Text(
-                  'Users',
+                  'Projects',
                   style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -188,16 +252,21 @@ class _UsersPageState extends State<UsersPage> {
                     ),
                   ),
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      PageTransition(
-                        type: PageTransitionType.rightToLeft,
-                        child: const AddUserPage(),
-                      ),
-                    );
+                    List<String> ids = [];
+                    int index = 0;
+                    for (var check in checkbox) {
+                      if (check) ids.add(projectIds[index]);
+                      index++;
+                    }
+                    UserService(uid: '')
+                        .editGrantedProjects(widget.user.id, ids);
+                    context
+                        .read<UserProvider>()
+                        .editGrantedProjects(widget.user.id, ids);
+                    Navigator.pop(context);
                   },
-                  icon: const Icon(Icons.add),
-                  label: const Text("New user"),
+                  icon: const Icon(Icons.edit),
+                  label: const Text("Save"),
                 ),
               ),
             ],
@@ -209,10 +278,10 @@ class _UsersPageState extends State<UsersPage> {
                   padding:
                       const EdgeInsets.only(left: 16.0, top: 16.0, right: 24),
                   child: TextFormField(
-                    initialValue: context.read<UserProvider>().currentFilter,
-                    decoration: style.getTextFieldDecoration('Search users'),
+                    initialValue: context.read<ProjectProvider>().currentFilter,
+                    decoration: style.getTextFieldDecoration('Search projects'),
                     onChanged: (value) {
-                      context.read<UserProvider>().filterUsers(value);
+                      context.read<ProjectProvider>().filterProjects(value);
                     },
                     style: const TextStyle(
                       color: Colors.white,
@@ -231,7 +300,7 @@ class _UsersPageState extends State<UsersPage> {
                       context: context,
                       builder: (BuildContext context) => SortDialog(
                         dropDown: dropDown,
-                        provider: 'users',
+                        provider: 'projects',
                       ),
                     );
                   },

@@ -31,15 +31,27 @@ class UserService {
   }
 
   Future<UserData> createUser(String id, String name, String email) async {
-    UserData response = await users.add({
+    UserData response = await users.doc(id).set({
       'displayName': name,
       'email': email,
       'projects': [],
       'role': 'user'
     }).then((value) {
-      UserData user = UserData(value.id, name, email, 'user', []);
+      UserData user = UserData(id, name, email, 'user', []);
       return user;
     });
     return response;
+  }
+
+  Future<void> editUser(String name, String id) async {
+    await users.doc(id).update({'displayName': name});
+  }
+
+  Future<void> editGrantedProjects(String id, List<String> ids) async {
+    await users.doc(id).update({'projects': ids});
+  }
+
+  Future<void> deleteUser(String id) async {
+    await users.doc(id).delete();
   }
 }

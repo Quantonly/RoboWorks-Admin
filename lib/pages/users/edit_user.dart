@@ -1,39 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 import 'package:robo_works_admin/dialogs/sign_out_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:robo_works_admin/models/user_data.dart';
 import 'package:robo_works_admin/providers/user_provider.dart';
-import 'package:robo_works_admin/services/authentication.dart';
 import 'package:robo_works_admin/globals/style.dart' as style;
 import 'package:robo_works_admin/services/database/user_service.dart';
 
-class AddUserPage extends StatefulWidget {
-  const AddUserPage({Key? key}) : super(key: key);
+class EditUserPage extends StatefulWidget {
+  final UserData user;
+  const EditUserPage({Key? key, required this.user}) : super(key: key);
 
   @override
-  State<AddUserPage> createState() => _AddUserPageState();
+  State<EditUserPage> createState() => _EditUserPageState();
 }
 
-class _AddUserPageState extends State<AddUserPage> {
+class _EditUserPageState extends State<EditUserPage> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController nameController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
 
-  void createUser() async {
-    context
-        .read<AuthenticationService>()
-        .signUp(
-          email: emailController.text.trim(),
-          password: passwordController.text.trim(),
-        )
-        .then((res) async {
-          UserData user = await UserService(uid: '').createUser(res['success'], nameController.text.trim(), emailController.text.trim());
-          context.read<UserProvider>().addUser(user);
-          Navigator.pop(context);
-        });
+  void editUser() async {
+    UserService(uid: '').editUser(nameController.text, widget.user.id);
+    context.read<UserProvider>().editUser(widget.user.id, nameController.text);
+    Navigator.pop(context);
+  }
+
+  @override
+  void initState() {
+    nameController.text = widget.user.displayName;
+    super.initState();
   }
 
   @override
@@ -42,7 +38,7 @@ class _AddUserPageState extends State<AddUserPage> {
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(40, 40, 40, 1),
         title: const Text(
-          'Create user',
+          'Edit user',
         ),
         actions: <Widget>[
           IconButton(
@@ -67,7 +63,7 @@ class _AddUserPageState extends State<AddUserPage> {
                 transform: Matrix4.translationValues(0.0, -30.0, 0.0),
                 child: const Center(
                   child: Text(
-                    'Create new user',
+                    'Edit user',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -98,47 +94,12 @@ class _AddUserPageState extends State<AddUserPage> {
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20, vertical: 10),
-                    child: TextFormField(
-                      controller: emailController,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: style.getTextFieldDecoration('Email'),
-                      validator: MultiValidator([
-                        RequiredValidator(errorText: 'Invalid email'),
-                      ]),
-                      keyboardType: TextInputType.emailAddress,
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                    ),
-                    child: TextFormField(
-                      controller: passwordController,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      decoration: style.getTextFieldDecoration('Password'),
-                      validator: MultiValidator([
-                        RequiredValidator(errorText: 'Invalid password'),
-                        MinLengthValidator(6, errorText: 'Password must be at least 6 characters long'),
-                      ]),
-                      keyboardType: TextInputType.name,
-                      obscureText: true,
-                      style: const TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
                 ]),
               ),
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
-                    createUser();
+                    editUser();
                   }
                 },
                 child: Container(
@@ -153,7 +114,7 @@ class _AddUserPageState extends State<AddUserPage> {
                   ),
                   child: const Center(
                     child: Text(
-                      'Create user',
+                      'Edit user',
                       style: TextStyle(
                         color: Colors.white,
                       ),

@@ -21,6 +21,21 @@ class UserProvider with ChangeNotifier {
     filterUsers(currentFilter);
   }
 
+  void editUser(String id, String name) {
+    _users.firstWhere((user) => user.id == id).displayName = name;
+    filterUsers(currentFilter);
+  }
+
+  void editGrantedProjects(String id, List<String> ids) {
+    _users.firstWhere((user) => user.id == id).projects = ids;
+    filterUsers(currentFilter);
+  }
+
+  void deleteUser(String id) {
+    _users.removeWhere((user) => user.id == id);
+    filterUsers(currentFilter);
+  }
+
   void filterUsers(filter) {
     if (filter == "") {
       _filteredUsers = _users;

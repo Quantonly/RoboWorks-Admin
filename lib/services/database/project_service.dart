@@ -1,10 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/models/robot.dart';
-import 'package:robo_works_admin/providers/project_provider.dart';
 import 'package:robo_works_admin/services/database/robot_service.dart';
 
 class ProjectService {

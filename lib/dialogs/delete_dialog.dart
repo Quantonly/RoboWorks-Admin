@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:robo_works_admin/models/project.dart';
 import 'package:robo_works_admin/models/robot.dart';
+import 'package:robo_works_admin/models/user_data.dart';
 import 'package:robo_works_admin/providers/robot_provider.dart';
 import 'package:robo_works_admin/services/database/project_service.dart';
 import 'package:robo_works_admin/services/database/robot_service.dart';
+import 'package:robo_works_admin/services/database/user_service.dart';
 
 class DeleteDialog extends StatelessWidget {
   final String mode;
   final Project? project;
   final Robot? robot;
-  const DeleteDialog({Key? key, required this.mode, this.project, this.robot})
+  final UserData? user;
+  const DeleteDialog({Key? key, required this.mode, this.project, this.robot, this.user})
       : super(key: key);
 
   Widget getTitle() {
@@ -31,7 +34,7 @@ class DeleteDialog extends StatelessWidget {
           ],
         ),
       );
-    } else {
+    } else if (mode == 'robot') {
       return RichText(
         text: TextSpan(
           style: const TextStyle(
@@ -42,6 +45,23 @@ class DeleteDialog extends StatelessWidget {
             TextSpan(text: 'Are you sure you want to delete ' + mode + ' '),
             TextSpan(
               text: robot?.name ?? '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const TextSpan(text: '?'),
+          ],
+        ),
+      );
+    } else {
+      return RichText(
+        text: TextSpan(
+          style: const TextStyle(
+            fontSize: 18.0,
+            color: Colors.black,
+          ),
+          children: <TextSpan>[
+            TextSpan(text: 'Are you sure you want to delete ' + mode + ' '),
+            TextSpan(
+              text: user?.displayName ?? '',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const TextSpan(text: '?'),
@@ -78,6 +98,9 @@ class DeleteDialog extends StatelessWidget {
             } else if (mode == 'robot') {
               RobotService().deleteRobot(robot?.id ?? '');
               Navigator.of(context).pop(['delete', robot?.id ?? '']);
+            } else {
+              UserService(uid: '').deleteUser(user?.id ?? '');
+              Navigator.of(context).pop(['delete', user?.id ?? '']);
             }
           },
         ),
